@@ -1,0 +1,11 @@
+{
+  "name": "graphql-todomvc",
+  "version": "1.0.0",
+  "description": "TodoMVC demonstration with GraphQL",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "zetavg <mail@zeta.vg>",
+  "license": "MIT"
+}
