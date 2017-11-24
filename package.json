@@ -4,8 +4,28 @@
   "description": "TodoMVC demonstration with GraphQL",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "nodemon src/server/index.js --exec 'babel-node --inspect'",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "flow": "flow"
   },
   "author": "zetavg <mail@zeta.vg>",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "atob": "^2.0.3",
+    "babel-cli": "^6.26.0",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-flow": "^6.23.0",
+    "babel-preset-stage-1": "^6.24.1",
+    "btoa": "^1.1.2",
+    "express": "^4.16.2",
+    "express-graphql": "^0.6.11",
+    "graphql": "^0.11.7",
+    "graphql-relay": "^0.5.3",
+    "left-pad": "^1.2.0",
+    "uuid": "^3.1.0"
+  },
+  "devDependencies": {
+    "flow-bin": "^0.59.0",
+    "nodemon": "^1.12.1"
+  }
 }
