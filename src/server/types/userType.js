@@ -1,6 +1,6 @@
 // @flow
 
-import { GraphQLObjectType } from 'graphql'
+import { GraphQLNonNull, GraphQLObjectType } from 'graphql'
 import { globalIdField, connectionDefinitions, connectionArgs } from 'graphql-relay'
 
 import { nodeInterface } from '../relay'
@@ -16,7 +16,7 @@ const userType = new GraphQLObjectType({
   fields: {
     id: globalIdField(),
     todoLists: {
-      type: todoListsConnection,
+      type: new GraphQLNonNull(todoListsConnection),
       args: connectionArgs,
       resolve: async (user, args) => {
         const todoLists = await getTodoListsFromUser(user)

@@ -161,14 +161,15 @@ export const deleteTodoItemByID = async (todoItemID: string): Promise<TodoItem> 
   return todoItem
 }
 
-export const updateAllTodoItemsInTodoList = async (todoListID: string, {
+export const updateAllTodoItemsOnTodoList = async (todoListID: string, {
   title,
   completed,
 }: {
   title?: string,
   completed?: boolean,
-}): Promise<TodoList> => {
+}): Promise<{ todoList: TodoList, updatedTodoItems: Array<TodoItem> }> => {
   const todoList = dataSource[todoListID]
+  const updatedTodoItems = []
   for (const todoItemID of todoList.todoItemIDs) {
     const todoItem = dataSource[todoItemID]
 
@@ -179,21 +180,33 @@ export const updateAllTodoItemsInTodoList = async (todoListID: string, {
     if (title && typeof title === 'string') {
       todoItem.title = title
     }
+
+    updatedTodoItems.push(todoItem)
   }
 
-  return todoList
+  return {
+    todoList,
+    updatedTodoItems,
+  }
 }
 
-export const clearCompletedTodoItemsFromTodoList = async (todoListID: string): Promise<TodoList> => {
+export const clearCompletedTodoItemsFromTodoList = async (
+  todoListID: string,
+): Promise<{ todoList: TodoList, deletedTodoItems: Array<TodoItem> }> => {
   const todoList = dataSource[todoListID]
+  const deletedTodoItems = []
 
   todoList.todoItemIDs = todoList.todoItemIDs.filter((todoItemID) => {
     if (!dataSource[todoItemID].completed) return true
+    deletedTodoItems.push(dataSource[todoItemID])
     delete dataSource[todoItemID]
     return false
   })
 
-  return todoList
+  return {
+    todoList,
+    deletedTodoItems,
+  }
 }
 
 export const getIndexFromDatasetAndCursor = (dataset: Array<Data>, cursor: string) => {

@@ -14,6 +14,9 @@ import { getTypeAndIDFromGlobalID } from '../relay'
 
 import { createTodoItem, getTodoListFromTodoItem, getTodoItemsFromTodoList, getEdgeFromDatasetAndNode } from '../data'
 
+import pubsub from '../subscriptions/pubsub'
+import { TODO_ITEM_CREATED } from '../subscriptions/consts'
+
 // $FlowFixMe
 const todoListTodoItemsConnectionEdgeType = todoListTodoItemsConnectionType.getFields().edges.type.ofType
 
@@ -32,15 +35,16 @@ const createTodoItemMutation = mutationWithClientMutationId({
   },
   outputFields: {
     todoItem: {
-      type: todoItemType,
+      type: new GraphQLNonNull(todoItemType),
       resolve: payload => payload.todoItem,
     },
     todoList: {
-      type: todoListType,
+      type: new GraphQLNonNull(todoListType),
       resolve: async payload => await getTodoListFromTodoItem(payload.todoItem),
     },
     todoListTodoItemsConnectionEdge: {
-      type: todoListTodoItemsConnectionEdgeType,
+      // $FlowFixMe
+      type: new GraphQLNonNull(todoListTodoItemsConnectionEdgeType),
       resolve: async payload => getEdgeFromDatasetAndNode(
         // $FlowFixMe
         await getTodoItemsFromTodoList(await getTodoListFromTodoItem(payload.todoItem)),
@@ -56,6 +60,8 @@ const createTodoItemMutation = mutationWithClientMutationId({
       title,
       completed,
     })
+
+    pubsub.publish(TODO_ITEM_CREATED, { todoListID: todoListGlobalID, todoItem })
 
     return {
       todoItem,

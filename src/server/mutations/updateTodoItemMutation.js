@@ -6,12 +6,16 @@ import {
   GraphQLString,
   GraphQLBoolean,
 } from 'graphql'
-import { mutationWithClientMutationId } from 'graphql-relay'
+import { mutationWithClientMutationId, toGlobalId } from 'graphql-relay'
 
 import todoItemType from '../types/todoItemType'
+import todoListType from '../types/todoListType'
 import { getTypeAndIDFromGlobalID } from '../relay'
 
 import { updateTodoItem } from '../data'
+
+import pubsub from '../subscriptions/pubsub'
+import { TODO_ITEM_UPDATED } from '../subscriptions/consts'
 
 const updateTodoItemMutation = mutationWithClientMutationId({
   name: 'UpdateTodoItem',
@@ -28,8 +32,12 @@ const updateTodoItemMutation = mutationWithClientMutationId({
   },
   outputFields: {
     todoItem: {
-      type: todoItemType,
+      type: new GraphQLNonNull(todoItemType),
       resolve: payload => payload.todoItem,
+    },
+    todoList: {
+      type: new GraphQLNonNull(todoListType),
+      resolve: payload => payload.todoList,
     },
   },
   mutateAndGetPayload: async ({ todoItemID: todoItemGlobalID, title, completed }) => {
@@ -39,6 +47,8 @@ const updateTodoItemMutation = mutationWithClientMutationId({
       title,
       completed,
     })
+
+    pubsub.publish(TODO_ITEM_UPDATED, { todoListID: toGlobalId('TodoList', todoItem.todoListID), todoItem })
 
     return {
       todoItem,

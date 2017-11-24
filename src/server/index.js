@@ -1,12 +1,14 @@
 // @flow
 
 import express from 'express'
-import graphqlHTTP from 'express-graphql'
+import { createServer } from 'http'
+import { SubscriptionServer } from 'subscriptions-transport-ws'
+import { execute, subscribe } from 'graphql'
+import graphqlHTTP from '../../vendor/express-graphql'
 import schema from './schema'
 
 import { getAuthenticatedUser } from './data'
 
-const host = process.env.HOST || '0.0.0.0'
 const port = process.env.PORT || 1337
 
 const app = express()
@@ -21,4 +23,18 @@ app.use('/graphql', graphqlHTTP({
   graphiql: true,
 }))
 
-app.listen(port, () => console.log(`Server running at http://${host}:${port}/`))
+const server = createServer(app)
+
+SubscriptionServer.create(
+  {
+    schema,
+    execute,
+    subscribe,
+  },
+  {
+    server,
+    path: '/graphql/subscriptions',
+  },
+)
+
+server.listen(port, () => console.log(`Server is now running on http://0.0.0.0:${port}`))

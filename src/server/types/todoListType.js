@@ -1,6 +1,7 @@
 // @flow
 
 import {
+  GraphQLNonNull,
   GraphQLObjectType,
   GraphQLString,
 } from 'graphql'
@@ -19,10 +20,10 @@ const todoListType = new GraphQLObjectType({
   fields: {
     id: globalIdField(),
     name: {
-      type: GraphQLString,
+      type: new GraphQLNonNull(GraphQLString),
     },
     items: {
-      type: todoListTodoItemsConnectionType,
+      type: new GraphQLNonNull(todoListTodoItemsConnectionType),
       args: connectionArgs,
       resolve: async (todoList, args) => {
         const todoItems = await getTodoItemsFromTodoList(todoList)

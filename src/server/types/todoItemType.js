@@ -1,6 +1,7 @@
 // @flow
 
 import {
+  GraphQLNonNull,
   GraphQLObjectType,
   GraphQLBoolean,
   GraphQLString,
@@ -15,10 +16,10 @@ const todoItemType = new GraphQLObjectType({
   fields: {
     id: globalIdField(),
     completed: {
-      type: GraphQLBoolean,
+      type: new GraphQLNonNull(GraphQLBoolean),
     },
     title: {
-      type: GraphQLString,
+      type: new GraphQLNonNull(GraphQLString),
     },
   },
 })
