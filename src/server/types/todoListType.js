@@ -4,11 +4,18 @@ import {
   GraphQLNonNull,
   GraphQLObjectType,
   GraphQLString,
+  GraphQLInt,
 } from 'graphql'
 import { globalIdField, connectionDefinitions, connectionArgs } from 'graphql-relay'
 
 import { nodeInterface } from '../relay'
-import { getTodoItemsFromTodoList, connectionFrom } from '../data'
+import {
+  getTodoItemsFromTodoList,
+  getTodoItemsCountFromTodoList,
+  getActiveTodoItemsCountFromTodoList,
+  getCompletedTodoItemsCountFromTodoList,
+  connectionFrom,
+} from '../data'
 import type { Data } from '../data'
 import todoItemType from './todoItemType'
 
@@ -33,6 +40,18 @@ const todoListType = new GraphQLObjectType({
           args,
         )
       },
+    },
+    todoItemsCount: {
+      type: new GraphQLNonNull(GraphQLInt),
+      resolve: async (todoList) => getTodoItemsCountFromTodoList(todoList),
+    },
+    activeTodoItemsCount: {
+      type: new GraphQLNonNull(GraphQLInt),
+      resolve: async (todoList) => getActiveTodoItemsCountFromTodoList(todoList),
+    },
+    completedTodoItemsCount: {
+      type: new GraphQLNonNull(GraphQLInt),
+      resolve: async (todoList) => getCompletedTodoItemsCountFromTodoList(todoList),
     },
   },
 })

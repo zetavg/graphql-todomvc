@@ -104,6 +104,18 @@ export const getTodoItemsFromTodoList = async (todoList: TodoList): Promise<Arra
   return todoList.todoItemIDs.map(id => dataSource[id])
 }
 
+export const getTodoItemsCountFromTodoList = async (todoList: TodoList): Promise<number> => {
+  return todoList.todoItemIDs.length
+}
+
+export const getActiveTodoItemsCountFromTodoList = async (todoList: TodoList): Promise<number> => {
+  return todoList.todoItemIDs.map(id => dataSource[id]).filter(i => !i.completed).length
+}
+
+export const getCompletedTodoItemsCountFromTodoList = async (todoList: TodoList): Promise<number> => {
+  return todoList.todoItemIDs.map(id => dataSource[id]).filter(i => i.completed).length
+}
+
 export const getTodoListFromTodoItem = async (todoItem: TodoItem): Promise<TodoList> => {
   return dataSource[todoItem.todoListID]
 }
