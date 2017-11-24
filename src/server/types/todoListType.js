@@ -3,6 +3,7 @@
 import {
   GraphQLNonNull,
   GraphQLObjectType,
+  GraphQLEnumType,
   GraphQLString,
   GraphQLInt,
 } from 'graphql'
@@ -31,9 +32,22 @@ const todoListType = new GraphQLObjectType({
     },
     items: {
       type: new GraphQLNonNull(todoListTodoItemsConnectionType),
-      args: connectionArgs,
+      args: {
+        ...connectionArgs,
+        filter: {
+          type: new GraphQLEnumType({
+            name: 'TodoListTodoItemsFilterEnum',
+            values: {
+              all: { value: 'all' },
+              active: { value: 'active' },
+              completed: { value: 'completed' },
+            },
+          }),
+        },
+      },
       resolve: async (todoList, args) => {
-        const todoItems = await getTodoItemsFromTodoList(todoList)
+        const { filter } = args
+        const todoItems = await getTodoItemsFromTodoList(todoList, { filter })
         return connectionFrom(
           // $FlowFixMe
           (todoItems: Array<Data>),

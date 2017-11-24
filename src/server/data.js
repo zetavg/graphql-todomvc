@@ -100,8 +100,21 @@ export const getTodoListsFromUser = async (user: User): Promise<Array<TodoList>>
   return user.todoListIDs.map(id => dataSource[id])
 }
 
-export const getTodoItemsFromTodoList = async (todoList: TodoList): Promise<Array<TodoItem>> => {
-  return todoList.todoItemIDs.map(id => dataSource[id])
+export const getTodoItemsFromTodoList = async (todoList: TodoList, {
+  filter,
+}: {|
+  filter?: string,
+|} = {}): Promise<Array<TodoItem>> => {
+  const todoItems = todoList.todoItemIDs.map(id => dataSource[id])
+
+  switch (filter) {
+    default:
+      return todoItems
+    case 'completed':
+      return todoItems.filter(i => i.completed)
+    case 'active':
+      return todoItems.filter(i => !i.completed)
+  }
 }
 
 export const getTodoItemsCountFromTodoList = async (todoList: TodoList): Promise<number> => {
