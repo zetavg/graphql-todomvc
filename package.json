@@ -4,7 +4,9 @@
   "description": "TodoMVC demonstration with GraphQL",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon src/server/index.js --exec 'babel-node --inspect'",
+    "dev": "nodemon src/server/index.js --exec 'babel-node --inspect'",
+    "start": "node dist/server/index.js",
+    "build": "babel src -d dist",
     "test": "echo \"Error: no test specified\" && exit 1",
     "flow": "flow"
   },

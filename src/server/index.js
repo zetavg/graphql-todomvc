@@ -4,7 +4,7 @@ import express from 'express'
 import { createServer } from 'http'
 import { SubscriptionServer } from 'subscriptions-transport-ws'
 import { execute, subscribe } from 'graphql'
-import graphqlHTTP from '../../vendor/express-graphql'
+import graphqlHTTP from '../vendor/express-graphql'
 import schema from './schema'
 
 import { getAuthenticatedUser } from './data'
