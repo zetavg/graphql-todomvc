@@ -13,16 +13,16 @@ import todoListType from '../types/todoListType'
 import todoItemType from '../types/todoItemType'
 
 import pubsub from './pubsub'
-import { COMPLETED_ITEMS_DELETED_ON_TODO_LIST } from './pubsub/event-types'
+import { TODO_ITEMS_DELETED } from './pubsub/event-types'
 
-const completedItemsDeletedOnTodoListSubscription = {
+const itemsOnTodoListDeletedSubscription = {
   args: {
     todoListID: {
       type: new GraphQLNonNull(GraphQLID),
     },
   },
   type: new GraphQLObjectType({
-    name: 'CompletedItemsDeletedOnTodoList',
+    name: 'ItemsOnTodoListDeleted',
     fields: {
       todoList: {
         type: new GraphQLNonNull(todoListType),
@@ -39,10 +39,10 @@ const completedItemsDeletedOnTodoListSubscription = {
     },
   }),
   subscribe: withFilter(
-    () => pubsub.asyncIterator(COMPLETED_ITEMS_DELETED_ON_TODO_LIST),
-    (payload, args) => payload.todoListID === args.todoListID,
+    () => pubsub.asyncIterator(TODO_ITEMS_DELETED),
+    (payload, args) => payload && payload.todoListID === args.todoListID,
   ),
   resolve: (payload: mixed) => payload,
 }
 
-export default completedItemsDeletedOnTodoListSubscription
+export default itemsOnTodoListDeletedSubscription

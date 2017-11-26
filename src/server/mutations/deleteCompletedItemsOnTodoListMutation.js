@@ -15,7 +15,7 @@ import todoItemType from '../types/todoItemType'
 import { deleteCompletedItemsOnTodoList } from '../data'
 
 import pubsub from '../subscriptions/pubsub'
-import { COMPLETED_ITEMS_DELETED_ON_TODO_LIST } from '../subscriptions/pubsub/event-types'
+import { TODO_ITEMS_DELETED } from '../subscriptions/pubsub/event-types'
 
 const deleteCompletedItemsOnTodoListMutation = mutationWithClientMutationId({
   name: 'DeleteCompletedItemsOnTodoList',
@@ -49,7 +49,7 @@ const deleteCompletedItemsOnTodoListMutation = mutationWithClientMutationId({
 
     const deletedTodoItemGlobalIDs = deletedTodoItemIDs.map(id => toGlobalId('TodoItem', id))
 
-    pubsub.publish(COMPLETED_ITEMS_DELETED_ON_TODO_LIST, {
+    pubsub.publish(TODO_ITEMS_DELETED, {
       todoListID: todoListGlobalID,
       todoList,
       deletedTodoItemIDs: deletedTodoItemGlobalIDs,

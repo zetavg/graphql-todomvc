@@ -26,7 +26,7 @@ const itemOnTodoListCreatedSubscription = {
   }),
   subscribe: withFilter(
     () => pubsub.asyncIterator(TODO_ITEM_CREATED),
-    (payload, args) => payload.todoListID === args.todoListID,
+    (payload, args) => payload && payload.todoListID === args.todoListID,
   ),
   resolve: (payload: mixed) => payload,
 }

@@ -17,7 +17,7 @@ import todoItemType from '../types/todoItemType'
 import { updateAllItemsOnTodoList } from '../data'
 
 import pubsub from '../subscriptions/pubsub'
-import { ALL_ITEMS_UPDATED_ON_TODO_LIST } from '../subscriptions/pubsub/event-types'
+import { TODO_ITEMS_UPDATED } from '../subscriptions/pubsub/event-types'
 
 const updateAllItemsOnTodoListMutation = mutationWithClientMutationId({
   name: 'UpdateAllItemsOnTodoList',
@@ -56,7 +56,7 @@ const updateAllItemsOnTodoListMutation = mutationWithClientMutationId({
 
     const updatedTodoItemGlobalIDs = updatedTodoItemIDs.map(id => toGlobalId('TodoItem', id))
 
-    pubsub.publish(ALL_ITEMS_UPDATED_ON_TODO_LIST, {
+    pubsub.publish(TODO_ITEMS_UPDATED, {
       todoListID: todoListGlobalID,
       todoList,
       updatedTodoItemIDs: updatedTodoItemGlobalIDs,

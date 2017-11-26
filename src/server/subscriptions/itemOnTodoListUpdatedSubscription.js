@@ -26,9 +26,8 @@ const itemOnTodoListUpdatedSubscription = {
   }),
   subscribe: withFilter(
     () => pubsub.asyncIterator(TODO_ITEM_UPDATED),
-    (payload, args) => payload.todoListID === args.todoListID,
+    (payload, args) => payload && payload.todoListID === args.todoListID,
   ),
-  // subscribe: () => pubsub.asyncIterator(TODO_ITEM_UPDATED),
   resolve: (payload: mixed) => payload,
 }
 

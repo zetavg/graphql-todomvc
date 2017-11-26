@@ -33,7 +33,16 @@ const todoItemCreatedUpdater = (store: RelayRecordSourceSelectorProxy, {
         (filter === 'active' && !todoItemCompleted) ||
         (filter === 'completed' && todoItemCompleted)
       ) {
-        ConnectionHandler.insertEdgeAfter(conn, todoListItemsConnectionEdge)
+        const aleadyInConn = conn.getLinkedRecords('edges')
+          .map(edge => edge.getValue('cursor'))
+          .includes(todoListItemsConnectionEdge.getValue('cursor'))
+
+        if (aleadyInConn) return
+
+        ConnectionHandler.insertEdgeAfter(
+          conn,
+          ConnectionHandler.buildConnectionEdge(store, conn, todoListItemsConnectionEdge),
+        )
       }
     })
   })

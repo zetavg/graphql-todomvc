@@ -61,7 +61,7 @@ class TodoListItemsWithFilterContainer extends Component<Props, State> {
 
 export default createRefetchContainer(
   TodoListItemsWithFilterContainer,
-  graphql.experimental`
+  graphql`
     fragment TodoListItemsWithFilter_todoList on TodoList
     @argumentDefinitions(
       filter: { type: "TodoListItemsFilterEnum", defaultValue: "all" }
@@ -70,7 +70,7 @@ export default createRefetchContainer(
       ...TodoListItems_todoList
     }
   `,
-  graphql.experimental`
+  graphql`
     query TodoListItemsWithFilterRefetchQuery(
       $todoListID: ID
       $filter: TodoListItemsFilterEnum!

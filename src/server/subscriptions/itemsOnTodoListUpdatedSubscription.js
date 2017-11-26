@@ -15,16 +15,16 @@ import todoListType from '../types/todoListType'
 import todoItemType from '../types/todoItemType'
 
 import pubsub from './pubsub'
-import { ALL_ITEMS_UPDATED_ON_TODO_LIST } from './pubsub/event-types'
+import { TODO_ITEMS_UPDATED } from './pubsub/event-types'
 
-const allItemsUpdatedOnTodoListSubscription = {
+const itemsOnTodoListUpdatedSubscription = {
   args: {
     todoListID: {
       type: new GraphQLNonNull(GraphQLID),
     },
   },
   type: new GraphQLObjectType({
-    name: 'AllItemsUpdatedOnTodoList',
+    name: 'ItemsOnTodoListUpdated',
     fields: {
       todoList: {
         type: new GraphQLNonNull(todoListType),
@@ -40,7 +40,7 @@ const allItemsUpdatedOnTodoListSubscription = {
       },
       changes: {
         type: new GraphQLNonNull(new GraphQLObjectType({
-          name: 'AllItemsUpdatedOnTodoListChanges',
+          name: 'ItemsOnTodoListUpdatedChanges',
           fields: {
             title: { type: GraphQLString },
             completed: { type: GraphQLBoolean },
@@ -51,10 +51,10 @@ const allItemsUpdatedOnTodoListSubscription = {
     },
   }),
   subscribe: withFilter(
-    () => pubsub.asyncIterator(ALL_ITEMS_UPDATED_ON_TODO_LIST),
-    (payload, args) => payload.todoListID === args.todoListID,
+    () => pubsub.asyncIterator(TODO_ITEMS_UPDATED),
+    (payload, args) => payload && payload.todoListID === args.todoListID,
   ),
   resolve: (payload: mixed) => payload,
 }
 
-export default allItemsUpdatedOnTodoListSubscription
+export default itemsOnTodoListUpdatedSubscription

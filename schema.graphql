@@ -1,21 +1,3 @@
-type AllItemsUpdatedOnTodoList {
-  todoList: TodoList!
-  updatedTodoItemIDs: [ID]!
-  updatedTodoItems: [TodoItem]!
-  changes: AllItemsUpdatedOnTodoListChanges!
-}
-
-type AllItemsUpdatedOnTodoListChanges {
-  title: String
-  completed: Boolean
-}
-
-type CompletedItemsDeletedOnTodoList {
-  todoList: TodoList!
-  deletedTodoItemIDs: [ID]!
-  deletedTodoItems: [TodoItem]!
-}
-
 input CreateTodoItemInput {
   todoListID: ID!
   title: String!
@@ -71,6 +53,24 @@ type ItemOnTodoListUpdated {
   todoList: TodoList!
 }
 
+type ItemsOnTodoListDeleted {
+  todoList: TodoList!
+  deletedTodoItemIDs: [ID]!
+  deletedTodoItems: [TodoItem]!
+}
+
+type ItemsOnTodoListUpdated {
+  todoList: TodoList!
+  updatedTodoItemIDs: [ID]!
+  updatedTodoItems: [TodoItem]!
+  changes: ItemsOnTodoListUpdatedChanges!
+}
+
+type ItemsOnTodoListUpdatedChanges {
+  title: String
+  completed: Boolean
+}
+
 type Mutation {
   createTodoItem(input: CreateTodoItemInput!): CreateTodoItemPayload
   updateTodoItem(input: UpdateTodoItemInput!): UpdateTodoItemPayload
@@ -113,8 +113,8 @@ type Subscription {
   itemOnTodoListCreated(todoListID: ID!): ItemOnTodoListCreated
   itemOnTodoListUpdated(todoListID: ID!): ItemOnTodoListUpdated
   itemOnTodoListDeleted(todoListID: ID!): ItemOnTodoListDeleted
-  allItemsUpdatedOnTodoList(todoListID: ID!): AllItemsUpdatedOnTodoList
-  completedItemsDeletedOnTodoList(todoListID: ID!): CompletedItemsDeletedOnTodoList
+  itemsOnTodoListUpdated(todoListID: ID!): ItemsOnTodoListUpdated
+  itemsOnTodoListDeleted(todoListID: ID!): ItemsOnTodoListDeleted
 }
 
 type TodoItem implements Node {

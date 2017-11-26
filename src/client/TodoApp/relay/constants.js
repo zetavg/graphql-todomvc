@@ -1,2 +1,3 @@
-/* eslint-disable import/prefer-default-export */
-export const API_ENDPOINT = '/graphql'
+export const GRAPHQL_ENDPOINT = `${window.location.protocol}//${window.location.host}/graphql`
+export const GRAPHQL_SUBSCRIPTION_ENDPOINT =
+  `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/graphql/subscriptions`

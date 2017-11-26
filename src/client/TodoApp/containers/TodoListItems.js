@@ -11,11 +11,11 @@ import { registerTodoListItemsConnectionName } from '../registrations/todoListIt
 
 import UpdateAllItemsOnTodoListMutation from '../mutations/UpdateAllItemsOnTodoListMutation'
 
-// import TodoItemAddedSubscription from '../subscriptions/TodoItemAddedSubscription'
-// import TodoItemUpdatedSubscription from '../subscriptions/TodoItemUpdatedSubscription'
-// import TodoItemsUpdatedSubscription from '../subscriptions/TodoItemsUpdatedSubscription'
-// import TodoItemRemovedSubscription from '../subscriptions/TodoItemRemovedSubscription'
-// import TodoItemsRemovedSubscription from '../subscriptions/TodoItemsRemovedSubscription'
+import ItemOnTodoListCreatedSubscription from '../subscriptions/ItemOnTodoListCreatedSubscription'
+import ItemOnTodoListUpdatedSubscription from '../subscriptions/ItemOnTodoListUpdatedSubscription'
+import ItemOnTodoListDeletedSubscription from '../subscriptions/ItemOnTodoListDeletedSubscription'
+import ItemsOnTodoListUpdatedSubscription from '../subscriptions/ItemsOnTodoListUpdatedSubscription'
+import ItemsOnTodoListDeletedSubscription from '../subscriptions/ItemsOnTodoListDeletedSubscription'
 
 type Props = {|
   todoList: {
@@ -26,11 +26,11 @@ type Props = {|
 
 class TodoListItemsContainer extends Component<Props> {
   /* eslint-disable react/sort-comp */
-  todoItemAddedSubscription: TodoItemAddedSubscription;
-  todoItemUpdatedSubscription: TodoItemUpdatedSubscription;
-  todoItemsUpdatedSubscription: TodoItemsUpdatedSubscription;
-  todoItemRemovedSubscription: TodoItemRemovedSubscription;
-  todoItemsRemovedSubscription: TodoItemsRemovedSubscription;
+  itemOnTodoListCreatedSubscription: ItemOnTodoListCreatedSubscription;
+  itemOnTodoListUpdatedSubscription: ItemOnTodoListUpdatedSubscription;
+  itemOnTodoListDeletedSubscription: ItemOnTodoListDeletedSubscription;
+  itemsOnTodoListUpdatedSubscription: ItemsOnTodoListUpdatedSubscription;
+  itemsOnTodoListDeletedSubscription: ItemsOnTodoListDeletedSubscription;
   component: TodoListItemsComponent;
   /* eslint-enable react/sort-comp */
 
@@ -39,25 +39,25 @@ class TodoListItemsContainer extends Component<Props> {
       todoListID: this.props.todoList.id,
     }]
 
-    // this.todoItemAddedSubscription = new TodoItemAddedSubscription(...subscriptionParams)
-    // this.todoItemUpdatedSubscription = new TodoItemUpdatedSubscription(...subscriptionParams)
-    // this.todoItemsUpdatedSubscription = new TodoItemsUpdatedSubscription(...subscriptionParams)
-    // this.todoItemRemovedSubscription = new TodoItemRemovedSubscription(...subscriptionParams)
-    // this.todoItemsRemovedSubscription = new TodoItemsRemovedSubscription(...subscriptionParams)
+    this.itemOnTodoListCreatedSubscription = new ItemOnTodoListCreatedSubscription(...subscriptionParams)
+    this.itemOnTodoListUpdatedSubscription = new ItemOnTodoListUpdatedSubscription(...subscriptionParams)
+    this.itemOnTodoListDeletedSubscription = new ItemOnTodoListDeletedSubscription(...subscriptionParams)
+    this.itemsOnTodoListUpdatedSubscription = new ItemsOnTodoListUpdatedSubscription(...subscriptionParams)
+    this.itemsOnTodoListDeletedSubscription = new ItemsOnTodoListDeletedSubscription(...subscriptionParams)
 
-    // this.todoItemAddedSubscription.subscribe()
-    // this.todoItemUpdatedSubscription.subscribe()
-    // this.todoItemsUpdatedSubscription.subscribe()
-    // this.todoItemRemovedSubscription.subscribe()
-    // this.todoItemsRemovedSubscription.subscribe()
+    this.itemOnTodoListCreatedSubscription.subscribe()
+    this.itemOnTodoListUpdatedSubscription.subscribe()
+    this.itemOnTodoListDeletedSubscription.subscribe()
+    this.itemsOnTodoListUpdatedSubscription.subscribe()
+    this.itemsOnTodoListDeletedSubscription.subscribe()
   }
 
   componentWillUnmount() {
-    // if (this.todoItemAddedSubscription) this.todoItemAddedSubscription.unsubscribe()
-    // if (this.todoItemUpdatedSubscription) this.todoItemUpdatedSubscription.unsubscribe()
-    // if (this.todoItemsUpdatedSubscription) this.todoItemsUpdatedSubscription.unsubscribe()
-    // if (this.todoItemRemovedSubscription) this.todoItemRemovedSubscription.unsubscribe()
-    // if (this.todoItemsRemovedSubscription) this.todoItemsRemovedSubscription.unsubscribe()
+    if (this.itemOnTodoListCreatedSubscription) this.itemOnTodoListCreatedSubscription.unsubscribe()
+    if (this.itemOnTodoListUpdatedSubscription) this.itemOnTodoListUpdatedSubscription.unsubscribe()
+    if (this.itemOnTodoListDeletedSubscription) this.itemOnTodoListDeletedSubscription.unsubscribe()
+    if (this.itemsOnTodoListUpdatedSubscription) this.itemsOnTodoListUpdatedSubscription.unsubscribe()
+    if (this.itemsOnTodoListDeletedSubscription) this.itemsOnTodoListDeletedSubscription.unsubscribe()
   }
 
   setFilter = (filter: 'all' | 'active' | 'completed') => {

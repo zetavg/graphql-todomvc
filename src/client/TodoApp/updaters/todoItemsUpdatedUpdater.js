@@ -17,8 +17,8 @@ const todoItemsUpdatedUpdater = (store: RelayRecordSourceSelectorProxy, {
       todoItem.setValue(changes.completed, 'completed')
     }
 
-    if (typeof changes.title === 'boolean') {
-      todoItem.setValue(changes.title, 'completed')
+    if (typeof changes.title === 'string') {
+      todoItem.setValue(changes.title, 'title')
     }
   }
 }
