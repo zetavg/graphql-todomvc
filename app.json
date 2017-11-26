@@ -1,0 +1,8 @@
+{
+  "name": "graphql-todomvc",
+  "buildpacks": [
+    {
+      "url": "heroku/nodejs"
+    }
+  ]
+}

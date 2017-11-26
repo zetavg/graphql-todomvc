@@ -4,8 +4,10 @@
   "description": "TodoMVC demonstration of GraphQL",
   "scripts": {
     "start": "node dist/server/index.js",
-    "build": "npm run update-schema && npm run relay-compile && npm run babel-compile && npm run webpack-pack && npm run copy-static-to-dist",
+    "build": "npm run babel-compile && npm run webpack-pack && npm run copy-static-to-dist",
     "dev": "concurrently \"npm run dev-server\" \"npm run relay-dev-compiler\"",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "flow": "flow",
     "dev-server": "ENV=development nodemon src/server/index.js --exec 'babel-node --inspect'",
     "relay-dev-compiler": "ENV=development nodemon ./scripts/relay-dev-compiler.js --exec 'babel-node'",
     "update-schema": "babel-node ./scripts/update-schema.js",
@@ -13,8 +15,7 @@
     "babel-compile": "babel src -d dist",
     "webpack-pack": "webpack",
     "copy-static-to-dist": "rm -rf dist/client/static && cp -r src/client/static dist/client/static",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "flow": "flow"
+    "postinstall": "npm run build"
   },
   "author": "zetavg <mail@zeta.vg>",
   "license": "MIT",
