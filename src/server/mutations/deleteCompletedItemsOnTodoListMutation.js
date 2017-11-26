@@ -5,19 +5,20 @@ import {
   GraphQLList,
   GraphQLID,
 } from 'graphql'
-import { mutationWithClientMutationId } from 'graphql-relay'
+import { mutationWithClientMutationId, toGlobalId } from 'graphql-relay'
+
+import { getTypeAndIDFromGlobalID } from '../relay'
 
 import todoListType from '../types/todoListType'
 import todoItemType from '../types/todoItemType'
-import { getTypeAndIDFromGlobalID } from '../relay'
 
-import { clearCompletedTodoItemsFromTodoList } from '../data'
+import { deleteCompletedItemsOnTodoList } from '../data'
 
 import pubsub from '../subscriptions/pubsub'
-import { COMPLETED_ITEMS_CLEARED_FROM_TODO_LIST } from '../subscriptions/consts'
+import { COMPLETED_ITEMS_DELETED_ON_TODO_LIST } from '../subscriptions/pubsub/event-types'
 
-const clearCompletedItemsFromTodoListMutation = mutationWithClientMutationId({
-  name: 'ClearCompletedItemsFromTodoList',
+const deleteCompletedItemsOnTodoListMutation = mutationWithClientMutationId({
+  name: 'DeleteCompletedItemsOnTodoList',
   inputFields: {
     todoListID: {
       type: new GraphQLNonNull(GraphQLID),
@@ -27,6 +28,10 @@ const clearCompletedItemsFromTodoListMutation = mutationWithClientMutationId({
     todoList: {
       type: new GraphQLNonNull(todoListType),
       resolve: payload => payload.todoList,
+    },
+    deletedTodoItemIDs: {
+      type: new GraphQLNonNull(new GraphQLList(GraphQLID)),
+      resolve: payload => payload.deletedTodoItemIDs,
     },
     deletedTodoItems: {
       type: new GraphQLNonNull(new GraphQLList(todoItemType)),
@@ -38,20 +43,25 @@ const clearCompletedItemsFromTodoListMutation = mutationWithClientMutationId({
 
     const {
       todoList,
+      deletedTodoItemIDs,
       deletedTodoItems,
-    } = await clearCompletedTodoItemsFromTodoList(todoListID)
+    } = await deleteCompletedItemsOnTodoList(todoListID)
 
-    pubsub.publish(COMPLETED_ITEMS_CLEARED_FROM_TODO_LIST, {
+    const deletedTodoItemGlobalIDs = deletedTodoItemIDs.map(id => toGlobalId('TodoItem', id))
+
+    pubsub.publish(COMPLETED_ITEMS_DELETED_ON_TODO_LIST, {
       todoListID: todoListGlobalID,
       todoList,
+      deletedTodoItemIDs: deletedTodoItemGlobalIDs,
       deletedTodoItems,
     })
 
     return {
       todoList,
+      deletedTodoItemIDs: deletedTodoItemGlobalIDs,
       deletedTodoItems,
     }
   },
 })
 
-export default clearCompletedItemsFromTodoListMutation
+export default deleteCompletedItemsOnTodoListMutation

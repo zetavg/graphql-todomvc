@@ -5,39 +5,30 @@ import {
   GraphQLObjectType,
   GraphQLID,
 } from 'graphql'
+
 import { withFilter } from 'graphql-subscriptions'
 
+import getSubscriptionFieldsFromMutation from './_getSubscriptionFieldsFromMutation'
+import updateTodoItemMutation from '../mutations/updateTodoItemMutation'
+
 import pubsub from './pubsub'
-import { TODO_ITEM_UPDATED } from './consts'
-
-import todoItemType from '../types/todoItemType'
-import todoListType from '../types/todoListType'
-
-import { getTodoListFromTodoItem } from '../data'
+import { TODO_ITEM_UPDATED } from './pubsub/event-types'
 
 const itemOnTodoListUpdatedSubscription = {
-  type: new GraphQLObjectType({
-    name: 'ItemOnTodoListUpdated',
-    fields: {
-      todoItem: {
-        type: new GraphQLNonNull(todoItemType),
-        resolve: payload => payload.todoItem,
-      },
-      todoList: {
-        type: new GraphQLNonNull(todoListType),
-        resolve: async payload => await getTodoListFromTodoItem(payload.todoItem),
-      },
-    },
-  }),
   args: {
     todoListID: {
       type: new GraphQLNonNull(GraphQLID),
     },
   },
+  type: new GraphQLObjectType({
+    name: 'ItemOnTodoListUpdated',
+    fields: getSubscriptionFieldsFromMutation(updateTodoItemMutation),
+  }),
   subscribe: withFilter(
     () => pubsub.asyncIterator(TODO_ITEM_UPDATED),
     (payload, args) => payload.todoListID === args.todoListID,
   ),
+  // subscribe: () => pubsub.asyncIterator(TODO_ITEM_UPDATED),
   resolve: (payload: mixed) => payload,
 }
 

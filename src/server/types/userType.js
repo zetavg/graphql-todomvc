@@ -1,12 +1,26 @@
 // @flow
 
-import { GraphQLNonNull, GraphQLObjectType } from 'graphql'
-import { globalIdField, connectionDefinitions, connectionArgs } from 'graphql-relay'
+import {
+  GraphQLNonNull,
+  GraphQLObjectType,
+  GraphQLID,
+} from 'graphql'
+import {
+  globalIdField,
+  connectionDefinitions,
+  connectionArgs,
+} from 'graphql-relay'
 
-import { nodeInterface } from '../relay'
-import { getTodoListsFromUser, connectionFrom } from '../data'
-import type { Data } from '../data'
+import { nodeInterface, getTypeAndIDFromGlobalID } from '../relay'
+
 import todoListType from './todoListType'
+
+import {
+  getTodoListsFromUser,
+  getTodoListFromUser,
+  getFirstTodoListFromUser,
+  connectionFor,
+} from '../data'
 
 const { connectionType: todoListsConnection } = connectionDefinitions({ nodeType: todoListType })
 
@@ -20,18 +34,27 @@ const userType = new GraphQLObjectType({
       args: connectionArgs,
       resolve: async (user, args) => {
         const todoLists = await getTodoListsFromUser(user)
-        return connectionFrom(
+        return connectionFor(
           // $FlowFixMe
-          (todoLists: Array<Data>),
+          todoLists,
           args,
         )
       },
     },
-    firstTodoList: {
+    todoList: {
       type: todoListType,
-      resolve: async (user) => {
-        const todoLists = await getTodoListsFromUser(user)
-        return todoLists[0]
+      args: {
+        id: {
+          type: GraphQLID,
+        },
+      },
+      resolve: async (user, { id }) => {
+        if (id) {
+          const { id: todoListID } = getTypeAndIDFromGlobalID(id)
+          return getTodoListFromUser(user, todoListID)
+        }
+
+        return await getFirstTodoListFromUser(user)
       },
     },
   },

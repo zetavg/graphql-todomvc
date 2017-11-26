@@ -4,9 +4,16 @@
   "description": "TodoMVC demonstration with GraphQL",
   "main": "index.js",
   "scripts": {
-    "dev": "nodemon src/server/index.js --exec 'babel-node --inspect'",
     "start": "node dist/server/index.js",
-    "build": "babel src -d dist",
+    "build": "npm run update-schema && npm run relay-compile && npm run babel-compile && npm run webpack-pack && npm run copy-static-to-dist",
+    "dev": "concurrently \"npm run dev-server\" \"npm run relay-dev-compiler\"",
+    "dev-server": "ENV=development nodemon src/server/index.js --exec 'babel-node --inspect'",
+    "relay-dev-compiler": "ENV=development nodemon ./scripts/relay-dev-compiler.js --exec 'babel-node'",
+    "update-schema": "babel-node ./scripts/update-schema.js",
+    "relay-compile": "relay-compiler --src ./src/client --schema ./schema.graphql",
+    "babel-compile": "babel src -d dist",
+    "webpack-pack": "webpack",
+    "copy-static-to-dist": "rm -rf dist/client/static && cp -r src/client/static dist/client/static",
     "test": "echo \"Error: no test specified\" && exit 1",
     "flow": "flow"
   },
@@ -15,8 +22,12 @@
   "dependencies": {
     "atob": "^2.0.3",
     "babel-cli": "^6.26.0",
+    "babel-loader": "^7.1.2",
+    "babel-plugin-relay": "^1.4.1",
+    "babel-polyfill": "^6.26.0",
     "babel-preset-env": "^1.6.1",
     "babel-preset-flow": "^6.23.0",
+    "babel-preset-react": "^6.24.1",
     "babel-preset-stage-1": "^6.24.1",
     "btoa": "^1.1.2",
     "express": "^4.16.2",
@@ -25,11 +36,26 @@
     "graphql-relay": "^0.5.3",
     "graphql-subscriptions": "^0.5.5",
     "left-pad": "^1.2.0",
+    "react": "^16.1.1",
+    "react-dom": "^16.1.1",
+    "react-relay": "^1.4.1",
     "subscriptions-transport-ws": "^0.9.1",
-    "uuid": "^3.1.0"
+    "uuid": "^3.1.0",
+    "validate.js": "^0.12.0",
+    "webpack": "^3.8.1"
   },
   "devDependencies": {
+    "concurrently": "^3.5.1",
     "flow-bin": "^0.59.0",
-    "nodemon": "^1.12.1"
+    "nodemon": "^1.12.1",
+    "relay-compiler": "^1.4.1",
+    "webpack-dev-middleware": "^1.12.1",
+    "webpack-hot-middleware": "^2.20.0"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "dist/*",
+      "src/client/*"
+    ]
   }
 }

@@ -8,17 +8,20 @@ import {
 } from 'graphql'
 import { mutationWithClientMutationId } from 'graphql-relay'
 
-import todoItemType from '../types/todoItemType'
-import todoListType, { todoListTodoItemsConnectionType } from '../types/todoListType'
 import { getTypeAndIDFromGlobalID } from '../relay'
 
-import { createTodoItem, getTodoListFromTodoItem, getTodoItemsFromTodoList, getEdgeFromDatasetAndNode } from '../data'
+import todoItemType from '../types/todoItemType'
+import todoListType, { todoListItemsConnectionEdgeType } from '../types/todoListType'
+
+import {
+  createTodoItem,
+  getListFromTodoItem,
+  getItemsFromTodoList,
+  getEdgeFromDatasetAndNode,
+} from '../data'
 
 import pubsub from '../subscriptions/pubsub'
-import { TODO_ITEM_CREATED } from '../subscriptions/consts'
-
-// $FlowFixMe
-const todoListTodoItemsConnectionEdgeType = todoListTodoItemsConnectionType.getFields().edges.type.ofType
+import { TODO_ITEM_CREATED } from '../subscriptions/pubsub/event-types'
 
 const createTodoItemMutation = mutationWithClientMutationId({
   name: 'CreateTodoItem',
@@ -40,14 +43,13 @@ const createTodoItemMutation = mutationWithClientMutationId({
     },
     todoList: {
       type: new GraphQLNonNull(todoListType),
-      resolve: async payload => await getTodoListFromTodoItem(payload.todoItem),
+      resolve: async payload => await getListFromTodoItem(payload.todoItem),
     },
-    todoListTodoItemsConnectionEdge: {
-      // $FlowFixMe
-      type: new GraphQLNonNull(todoListTodoItemsConnectionEdgeType),
+    todoListItemsConnectionEdge: {
+      type: new GraphQLNonNull(todoListItemsConnectionEdgeType),
       resolve: async payload => getEdgeFromDatasetAndNode(
         // $FlowFixMe
-        await getTodoItemsFromTodoList(await getTodoListFromTodoItem(payload.todoItem)),
+        await getItemsFromTodoList(await getListFromTodoItem(payload.todoItem)),
         payload.todoItem,
       ),
     },
@@ -61,11 +63,16 @@ const createTodoItemMutation = mutationWithClientMutationId({
       completed,
     })
 
-    pubsub.publish(TODO_ITEM_CREATED, { todoListID: todoListGlobalID, todoItem })
-
-    return {
+    const payload = {
       todoItem,
     }
+
+    pubsub.publish(TODO_ITEM_CREATED, {
+      todoListID: todoListGlobalID,
+      ...payload,
+    })
+
+    return payload
   },
 })
 

@@ -8,14 +8,15 @@ import {
 } from 'graphql'
 import { mutationWithClientMutationId, toGlobalId } from 'graphql-relay'
 
-import todoItemType from '../types/todoItemType'
-import todoListType from '../types/todoListType'
 import { getTypeAndIDFromGlobalID } from '../relay'
 
-import { updateTodoItem } from '../data'
+import todoItemType from '../types/todoItemType'
+import todoListType from '../types/todoListType'
+
+import { updateTodoItem, getListFromTodoItem } from '../data'
 
 import pubsub from '../subscriptions/pubsub'
-import { TODO_ITEM_UPDATED } from '../subscriptions/consts'
+import { TODO_ITEM_UPDATED } from '../subscriptions/pubsub/event-types'
 
 const updateTodoItemMutation = mutationWithClientMutationId({
   name: 'UpdateTodoItem',
@@ -37,22 +38,28 @@ const updateTodoItemMutation = mutationWithClientMutationId({
     },
     todoList: {
       type: new GraphQLNonNull(todoListType),
-      resolve: payload => payload.todoList,
+      resolve: async payload => getListFromTodoItem(payload.todoItem),
     },
   },
   mutateAndGetPayload: async ({ todoItemID: todoItemGlobalID, title, completed }) => {
     const { id: todoItemID } = getTypeAndIDFromGlobalID(todoItemGlobalID)
 
+    // $FlowFixMe
     const todoItem = await updateTodoItem(todoItemID, {
       title,
       completed,
     })
 
-    pubsub.publish(TODO_ITEM_UPDATED, { todoListID: toGlobalId('TodoList', todoItem.todoListID), todoItem })
-
-    return {
+    const payload = {
       todoItem,
     }
+
+    pubsub.publish(TODO_ITEM_UPDATED, {
+      todoListID: toGlobalId('TodoList', todoItem.listID),
+      ...payload,
+    })
+
+    return payload
   },
 })
 

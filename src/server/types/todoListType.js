@@ -2,41 +2,62 @@
 
 import {
   GraphQLNonNull,
+  GraphQLInterfaceType,
   GraphQLObjectType,
   GraphQLEnumType,
-  GraphQLString,
+  GraphQLID,
   GraphQLInt,
+  GraphQLString,
 } from 'graphql'
-import { globalIdField, connectionDefinitions, connectionArgs } from 'graphql-relay'
+import {
+  toGlobalId,
+  globalIdField,
+  connectionDefinitions,
+  connectionArgs,
+} from 'graphql-relay'
 
 import { nodeInterface } from '../relay'
-import {
-  getTodoItemsFromTodoList,
-  getTodoItemsCountFromTodoList,
-  getActiveTodoItemsCountFromTodoList,
-  getCompletedTodoItemsCountFromTodoList,
-  connectionFrom,
-} from '../data'
-import type { Data } from '../data'
+
+import getType from './_getType'
 import todoItemType from './todoItemType'
 
-export const { connectionType: todoListTodoItemsConnectionType } = connectionDefinitions({ nodeType: todoItemType })
+import {
+  getUserFromTodoList,
+  getItemsFromTodoList,
+  getItemsCountFromTodoList,
+  getActiveItemsCountFromTodoList,
+  getCompletedItemsCountFromTodoList,
+  connectionFor,
+} from '../data'
+
+export const { connectionType: todoListItemsConnectionType } = connectionDefinitions({ nodeType: todoItemType })
+export const todoListItemsConnectionEdgeType: GraphQLInterfaceType =
+  // $FlowFixMe
+  todoListItemsConnectionType.getFields().edges.type.ofType
 
 const todoListType = new GraphQLObjectType({
   name: 'TodoList',
   interfaces: [nodeInterface],
-  fields: {
+  fields: () => ({
     id: globalIdField(),
     name: {
       type: new GraphQLNonNull(GraphQLString),
     },
+    userID: {
+      type: new GraphQLNonNull(GraphQLID),
+      resolve: todoList => toGlobalId('User', todoList.userID),
+    },
+    user: {
+      type: new GraphQLNonNull(getType('userType')),
+      resolve: getUserFromTodoList,
+    },
     items: {
-      type: new GraphQLNonNull(todoListTodoItemsConnectionType),
+      type: new GraphQLNonNull(todoListItemsConnectionType),
       args: {
         ...connectionArgs,
         filter: {
           type: new GraphQLEnumType({
-            name: 'TodoListTodoItemsFilterEnum',
+            name: 'TodoListItemsFilterEnum',
             values: {
               all: { value: 'all' },
               active: { value: 'active' },
@@ -47,27 +68,27 @@ const todoListType = new GraphQLObjectType({
       },
       resolve: async (todoList, args) => {
         const { filter } = args
-        const todoItems = await getTodoItemsFromTodoList(todoList, { filter })
-        return connectionFrom(
+        const todoItems = await getItemsFromTodoList(todoList, { filter })
+        return connectionFor(
           // $FlowFixMe
-          (todoItems: Array<Data>),
+          todoItems,
           args,
         )
       },
     },
-    todoItemsCount: {
+    itemsCount: {
       type: new GraphQLNonNull(GraphQLInt),
-      resolve: async (todoList) => getTodoItemsCountFromTodoList(todoList),
+      resolve: getItemsCountFromTodoList,
     },
-    activeTodoItemsCount: {
+    activeItemsCount: {
       type: new GraphQLNonNull(GraphQLInt),
-      resolve: async (todoList) => getActiveTodoItemsCountFromTodoList(todoList),
+      resolve: getActiveItemsCountFromTodoList,
     },
-    completedTodoItemsCount: {
+    completedItemsCount: {
       type: new GraphQLNonNull(GraphQLInt),
-      resolve: async (todoList) => getCompletedTodoItemsCountFromTodoList(todoList),
+      resolve: getCompletedItemsCountFromTodoList,
     },
-  },
+  }),
 })
 
 export default todoListType

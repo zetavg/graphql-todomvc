@@ -1,0 +1,215 @@
+type AllItemsUpdatedOnTodoList {
+  todoList: TodoList!
+  updatedTodoItemIDs: [ID]!
+  updatedTodoItems: [TodoItem]!
+  changes: AllItemsUpdatedOnTodoListChanges!
+}
+
+type AllItemsUpdatedOnTodoListChanges {
+  title: String
+  completed: Boolean
+}
+
+type CompletedItemsDeletedOnTodoList {
+  todoList: TodoList!
+  deletedTodoItemIDs: [ID]!
+  deletedTodoItems: [TodoItem]!
+}
+
+input CreateTodoItemInput {
+  todoListID: ID!
+  title: String!
+  completed: Boolean
+  clientMutationId: String
+}
+
+type CreateTodoItemPayload {
+  todoItem: TodoItem!
+  todoList: TodoList!
+  todoListItemsConnectionEdge: TodoItemEdge!
+  clientMutationId: String
+}
+
+input DeleteCompletedItemsOnTodoListInput {
+  todoListID: ID!
+  clientMutationId: String
+}
+
+type DeleteCompletedItemsOnTodoListPayload {
+  todoList: TodoList!
+  deletedTodoItemIDs: [ID]!
+  deletedTodoItems: [TodoItem]!
+  clientMutationId: String
+}
+
+input DeleteTodoItemInput {
+  todoItemID: ID!
+  clientMutationId: String
+}
+
+type DeleteTodoItemPayload {
+  deletedTodoItemID: ID!
+  deletedtodoItem: TodoItem!
+  todoList: TodoList!
+  clientMutationId: String
+}
+
+type ItemOnTodoListCreated {
+  todoItem: TodoItem!
+  todoList: TodoList!
+  todoListItemsConnectionEdge: TodoItemEdge!
+}
+
+type ItemOnTodoListDeleted {
+  deletedTodoItemID: ID!
+  deletedtodoItem: TodoItem!
+  todoList: TodoList!
+}
+
+type ItemOnTodoListUpdated {
+  todoItem: TodoItem!
+  todoList: TodoList!
+}
+
+type Mutation {
+  createTodoItem(input: CreateTodoItemInput!): CreateTodoItemPayload
+  updateTodoItem(input: UpdateTodoItemInput!): UpdateTodoItemPayload
+  deleteTodoItem(input: DeleteTodoItemInput!): DeleteTodoItemPayload
+  updateAllItemsOnTodoList(input: UpdateAllItemsOnTodoListInput!): UpdateAllItemsOnTodoListPayload
+  deleteCompletedItemsOnTodoList(input: DeleteCompletedItemsOnTodoListInput!): DeleteCompletedItemsOnTodoListPayload
+}
+
+# An object with an ID
+interface Node {
+  # The id of the object.
+  id: ID!
+}
+
+# Information about pagination in a connection.
+type PageInfo {
+  # When paginating forwards, are there more items?
+  hasNextPage: Boolean!
+
+  # When paginating backwards, are there more items?
+  hasPreviousPage: Boolean!
+
+  # When paginating backwards, the cursor to continue.
+  startCursor: String
+
+  # When paginating forwards, the cursor to continue.
+  endCursor: String
+}
+
+type Query {
+  # Fetches an object given its ID
+  node(
+    # The ID of an object
+    id: ID!
+  ): Node
+  viewer: User
+}
+
+type Subscription {
+  itemOnTodoListCreated(todoListID: ID!): ItemOnTodoListCreated
+  itemOnTodoListUpdated(todoListID: ID!): ItemOnTodoListUpdated
+  itemOnTodoListDeleted(todoListID: ID!): ItemOnTodoListDeleted
+  allItemsUpdatedOnTodoList(todoListID: ID!): AllItemsUpdatedOnTodoList
+  completedItemsDeletedOnTodoList(todoListID: ID!): CompletedItemsDeletedOnTodoList
+}
+
+type TodoItem implements Node {
+  # The ID of an object
+  id: ID!
+  completed: Boolean!
+  title: String!
+  listID: ID!
+  list: TodoList!
+}
+
+# A connection to a list of items.
+type TodoItemConnection {
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+
+  # A list of edges.
+  edges: [TodoItemEdge]
+}
+
+# An edge in a connection.
+type TodoItemEdge {
+  # The item at the end of the edge
+  node: TodoItem
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+type TodoList implements Node {
+  # The ID of an object
+  id: ID!
+  name: String!
+  userID: ID!
+  user: User!
+  items(after: String, first: Int, before: String, last: Int, filter: TodoListItemsFilterEnum): TodoItemConnection!
+  itemsCount: Int!
+  activeItemsCount: Int!
+  completedItemsCount: Int!
+}
+
+# A connection to a list of items.
+type TodoListConnection {
+  # Information to aid in pagination.
+  pageInfo: PageInfo!
+
+  # A list of edges.
+  edges: [TodoListEdge]
+}
+
+# An edge in a connection.
+type TodoListEdge {
+  # The item at the end of the edge
+  node: TodoList
+
+  # A cursor for use in pagination
+  cursor: String!
+}
+
+enum TodoListItemsFilterEnum {
+  all
+  active
+  completed
+}
+
+input UpdateAllItemsOnTodoListInput {
+  todoListID: ID!
+  title: String
+  completed: Boolean
+  clientMutationId: String
+}
+
+type UpdateAllItemsOnTodoListPayload {
+  todoList: TodoList!
+  updatedTodoItemIDs: [ID]!
+  updatedTodoItems: [TodoItem]!
+  clientMutationId: String
+}
+
+input UpdateTodoItemInput {
+  todoItemID: ID!
+  title: String
+  completed: Boolean
+  clientMutationId: String
+}
+
+type UpdateTodoItemPayload {
+  todoItem: TodoItem!
+  todoList: TodoList!
+  clientMutationId: String
+}
+
+type User implements Node {
+  # The ID of an object
+  id: ID!
+  todoLists(after: String, first: Int, before: String, last: Int): TodoListConnection!
+  todoList(id: ID): TodoList
+}

@@ -1,9 +1,21 @@
-// @flow
+/**
+ * In-memory storage of the application data.
+ *
+ * The data is saved as variables and will be reset after the server restarts,
+ * but you could imagine saving and retrieving this data from a remote database
+ * rather than remote JavaScript variables in a more complex application.
+ *
+ * @flow
+ */
 
 import uuidv4 from 'uuid/v4'
 import atob from 'atob'
 import btoa from 'btoa'
 import leftPad from 'left-pad'
+
+/**
+ * Flow types.
+ */
 
 export interface User {
   +__type: 'User',
@@ -16,18 +28,22 @@ export interface TodoList {
   +userID: string,
   +id: string,
   +name: string,
-  +todoItemIDs: Array<string>,
+  +itemIDs: Array<string>,
 }
 
 export interface TodoItem {
   +__type: 'TodoItem',
   +id: string,
-  +todoListID: string,
+  +listID: string,
   +title: string,
   +completed: boolean,
 }
 
 export type Data = User | TodoList | TodoItem;
+
+/**
+ * Defines initial data for the todo application.
+ */
 
 const defaultUserID = '00000000-0000-0000-0000-000000000000'
 const todoList0ID = '00000001-0000-0000-0000-000000000000'
@@ -36,7 +52,7 @@ const todoList1ID = '00000001-0000-0000-0000-000000000001'
 const todoList0TodoItem0: TodoItem = {
   __type: 'TodoItem',
   id: '00000002-0000-0000-0000-000000000000',
-  todoListID: todoList0ID,
+  listID: todoList0ID,
   title: 'Taste JavaScript',
   completed: true,
 }
@@ -44,7 +60,7 @@ const todoList0TodoItem0: TodoItem = {
 const todoList0TodoItem1: TodoItem = {
   __type: 'TodoItem',
   id: '00000002-0000-0000-0000-000000000001',
-  todoListID: todoList0ID,
+  listID: todoList0ID,
   title: 'Buy a unicorn',
   completed: false,
 }
@@ -54,13 +70,13 @@ const todoList0: TodoList = {
   userID: defaultUserID,
   id: todoList0ID,
   name: 'Todos',
-  todoItemIDs: [todoList0TodoItem0.id, todoList0TodoItem1.id],
+  itemIDs: [todoList0TodoItem0.id, todoList0TodoItem1.id],
 }
 
 const todoList1TodoItems: Array<TodoItem> = [...Array(100)].map((_, i) => ({
   __type: 'TodoItem',
   id: `00000002-0001-0000-0000-0000000000${leftPad(i, 2, '0')}`,
-  todoListID: todoList1ID,
+  listID: todoList1ID,
   title: `Item ${i}`,
   completed: false,
 }))
@@ -70,7 +86,7 @@ const todoList1: TodoList = {
   userID: defaultUserID,
   id: todoList1ID,
   name: 'Another List',
-  todoItemIDs: todoList1TodoItems.map(i => i.id),
+  itemIDs: todoList1TodoItems.map(i => i.id),
 }
 
 const defaultUser: User = {
@@ -79,6 +95,11 @@ const defaultUser: User = {
   todoListIDs: [todoList0.id, todoList1.id],
 }
 
+/**
+ * In-memory data source.
+ *
+ * All objects will be stored in this map with their id (uuid) as the key.
+ */
 const dataSource = {
   [defaultUser.id]: defaultUser,
   [todoList0.id]: todoList0,
@@ -88,24 +109,60 @@ const dataSource = {
   ...todoList1TodoItems.reduce((obj, item) => ({ ...obj, [item.id]: item }), {}),
 }
 
+/**
+ * Query for data with the given id.
+ */
 export const getDataByID = async (id: string): Promise<Data> => {
   return dataSource[id]
 }
 
+/**
+ * Get the authenticated user using the given credentials.
+ */
 export const getAuthenticatedUser = async (): Promise<User> => {
   return defaultUser
 }
 
+/**
+ * Fetch todo lists from the given user.
+ */
 export const getTodoListsFromUser = async (user: User): Promise<Array<TodoList>> => {
   return user.todoListIDs.map(id => dataSource[id])
 }
 
-export const getTodoItemsFromTodoList = async (todoList: TodoList, {
+/**
+ * Fetch a specific todo list from the given user.
+ */
+export const getTodoListFromUser = async (user: User, todoListID: string): Promise<TodoList> => {
+  const userTodoListID = user.todoListIDs.find(id => id === todoListID)
+  if (!userTodoListID) throw new Error('Cannot find todo list')
+  return dataSource[userTodoListID]
+}
+
+/**
+ * Fetch the first todo list from the given user.
+ */
+export const getFirstTodoListFromUser = async (user: User): Promise<?TodoList> => {
+  if (!user.todoListIDs[0]) return null
+  return dataSource[user.todoListIDs[0]]
+}
+
+/**
+ * Fetch the user from the given todo list.
+ */
+export const getUserFromTodoList = async (todoList: TodoList): Promise<TodoList> => {
+  return dataSource[todoList.userID]
+}
+
+/**
+ * Fetch items from the given todo list.
+ */
+export const getItemsFromTodoList = async (todoList: TodoList, {
   filter,
 }: {|
   filter?: string,
 |} = {}): Promise<Array<TodoItem>> => {
-  const todoItems = todoList.todoItemIDs.map(id => dataSource[id])
+  const todoItems = todoList.itemIDs.map(id => dataSource[id])
 
   switch (filter) {
     default:
@@ -117,22 +174,37 @@ export const getTodoItemsFromTodoList = async (todoList: TodoList, {
   }
 }
 
-export const getTodoItemsCountFromTodoList = async (todoList: TodoList): Promise<number> => {
-  return todoList.todoItemIDs.length
+/**
+ * Get the number of items on a given todo list.
+ */
+export const getItemsCountFromTodoList = async (todoList: TodoList): Promise<number> => {
+  return todoList.itemIDs.length
 }
 
-export const getActiveTodoItemsCountFromTodoList = async (todoList: TodoList): Promise<number> => {
-  return todoList.todoItemIDs.map(id => dataSource[id]).filter(i => !i.completed).length
+/**
+ * Get the number of active items on a given todo list.
+ */
+export const getActiveItemsCountFromTodoList = async (todoList: TodoList): Promise<number> => {
+  return todoList.itemIDs.map(id => dataSource[id]).filter(i => !i.completed).length
 }
 
-export const getCompletedTodoItemsCountFromTodoList = async (todoList: TodoList): Promise<number> => {
-  return todoList.todoItemIDs.map(id => dataSource[id]).filter(i => i.completed).length
+/**
+ * Get the number of completed items on a given todo list.
+ */
+export const getCompletedItemsCountFromTodoList = async (todoList: TodoList): Promise<number> => {
+  return todoList.itemIDs.map(id => dataSource[id]).filter(i => i.completed).length
 }
 
-export const getTodoListFromTodoItem = async (todoItem: TodoItem): Promise<TodoList> => {
-  return dataSource[todoItem.todoListID]
+/**
+ * Fetch the todo list from a given todo item.
+ */
+export const getListFromTodoItem = async (todoItem: TodoItem): Promise<TodoList> => {
+  return dataSource[todoItem.listID]
 }
 
+/**
+ * Create a todo item.
+ */
 export const createTodoItem = async ({
   todoListID,
   title,
@@ -147,17 +219,20 @@ export const createTodoItem = async ({
   const newTodoItem: TodoItem = {
     __type: 'TodoItem',
     id: uuidv4(),
-    todoListID,
+    listID: todoListID,
     title,
     completed: completed || false,
   }
 
   dataSource[newTodoItem.id] = newTodoItem
-  todoList.todoItemIDs.push(newTodoItem.id)
+  todoList.itemIDs.push(newTodoItem.id)
 
   return newTodoItem
 }
 
+/**
+ * Update a todo item.
+ */
 export const updateTodoItem = async (todoItemID: string, {
   title,
   completed,
@@ -178,24 +253,35 @@ export const updateTodoItem = async (todoItemID: string, {
   return todoItem
 }
 
-export const deleteTodoItemByID = async (todoItemID: string): Promise<TodoItem> => {
+/**
+ * Delete a todo item.
+ */
+export const deleteTodoItem = async (todoItemID: string): Promise<TodoItem> => {
   const todoItem = dataSource[todoItemID]
-  const todoList = await getTodoListFromTodoItem(todoItem)
-  todoList.todoItemIDs.splice(todoList.todoItemIDs.indexOf(todoItem.id), 1)
+  const todoList = dataSource[todoItem.listID]
+  todoList.itemIDs.splice(todoList.itemIDs.indexOf(todoItem.id), 1)
   delete dataSource[todoItemID]
   return todoItem
 }
 
-export const updateAllTodoItemsOnTodoList = async (todoListID: string, {
+/**
+ * Update all todo items on a given todo list.
+ */
+export const updateAllItemsOnTodoList = async (todoListID: string, {
   title,
   completed,
 }: {
   title?: string,
   completed?: boolean,
-}): Promise<{ todoList: TodoList, updatedTodoItems: Array<TodoItem> }> => {
+}): Promise<{
+  todoList: TodoList,
+  updatedTodoItemIDs: Array<string>,
+  updatedTodoItems: Array<TodoItem>,
+}> => {
   const todoList = dataSource[todoListID]
   const updatedTodoItems = []
-  for (const todoItemID of todoList.todoItemIDs) {
+
+  for (const todoItemID of todoList.itemIDs) {
     const todoItem = dataSource[todoItemID]
 
     if (typeof completed === 'boolean') {
@@ -209,46 +295,58 @@ export const updateAllTodoItemsOnTodoList = async (todoListID: string, {
     updatedTodoItems.push(todoItem)
   }
 
+  const updatedTodoItemIDs = updatedTodoItems.map(o => o.id)
+
   return {
     todoList,
     updatedTodoItems,
+    updatedTodoItemIDs,
   }
 }
 
-export const clearCompletedTodoItemsFromTodoList = async (
+/**
+ * Delete completed items on a given todo list.
+ */
+export const deleteCompletedItemsOnTodoList = async (
   todoListID: string,
-): Promise<{ todoList: TodoList, deletedTodoItems: Array<TodoItem> }> => {
+): Promise<{
+  todoList: TodoList,
+  deletedTodoItemIDs: Array<string>,
+  deletedTodoItems: Array<TodoItem>,
+}> => {
   const todoList = dataSource[todoListID]
   const deletedTodoItems = []
 
-  todoList.todoItemIDs = todoList.todoItemIDs.filter((todoItemID) => {
+  todoList.itemIDs = todoList.itemIDs.filter((todoItemID) => {
     if (!dataSource[todoItemID].completed) return true
     deletedTodoItems.push(dataSource[todoItemID])
     delete dataSource[todoItemID]
     return false
   })
 
+  const deletedTodoItemIDs = deletedTodoItems.map(o => o.id)
+
   return {
     todoList,
     deletedTodoItems,
+    deletedTodoItemIDs,
   }
 }
 
-export const getIndexFromDatasetAndCursor = (dataset: Array<Data>, cursor: string) => {
-  const [cursorType, cursorData] = atob(cursor).split(':')
+/**
+ * Relay Connection helpers.
+ */
 
-  switch (cursorType) {
-    case 'id-cursor':
-      return dataset.findIndex(d => d.id === cursorData)
-    default:
-      return -1
-  }
-}
-
+/**
+ * Get the cursor for a given node in the given dataset.
+ */
 export const getCursorFromDatasetAndNode = (dataset: Array<Data>, node: Data) => {
   return btoa(`id-cursor:${node.id}`)
 }
 
+/**
+ * Get the edge for a given node in the given dataset.
+ */
 export const getEdgeFromDatasetAndNode = (dataset: Array<Data>, node: Data) => {
   return {
     cursor: getCursorFromDatasetAndNode(dataset, node),
@@ -256,7 +354,10 @@ export const getEdgeFromDatasetAndNode = (dataset: Array<Data>, node: Data) => {
   }
 }
 
-export const connectionFrom = (dataset: Array<Data>, args: {
+/**
+ * Get the connection for a given dataset with the given args.
+ */
+export const connectionFor = (dataset: Array<Data>, args: {
   before?: ?string,
   after?: ?string,
   first?: ?number,
@@ -308,5 +409,16 @@ export const connectionFrom = (dataset: Array<Data>, args: {
       hasPreviousPage: typeof last === 'number' ? startIndex > 0 : false,
       hasNextPage: typeof first === 'number' ? endIndex < dataset.length - 1 : false,
     },
+  }
+}
+
+const getIndexFromDatasetAndCursor = (dataset: Array<Data>, cursor: string) => {
+  const [cursorType, cursorData] = atob(cursor).split(':')
+
+  switch (cursorType) {
+    case 'id-cursor':
+      return dataset.findIndex(d => d.id === cursorData)
+    default:
+      return -1
   }
 }

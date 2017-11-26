@@ -7,16 +7,17 @@ import {
   GraphQLString,
   GraphQLBoolean,
 } from 'graphql'
-import { mutationWithClientMutationId } from 'graphql-relay'
+import { mutationWithClientMutationId, toGlobalId } from 'graphql-relay'
+
+import { getTypeAndIDFromGlobalID } from '../relay'
 
 import todoListType from '../types/todoListType'
 import todoItemType from '../types/todoItemType'
-import { getTypeAndIDFromGlobalID } from '../relay'
 
-import { updateAllTodoItemsOnTodoList } from '../data'
+import { updateAllItemsOnTodoList } from '../data'
 
 import pubsub from '../subscriptions/pubsub'
-import { ALL_ITEMS_UPDATED_ON_TODO_LIST } from '../subscriptions/consts'
+import { ALL_ITEMS_UPDATED_ON_TODO_LIST } from '../subscriptions/pubsub/event-types'
 
 const updateAllItemsOnTodoListMutation = mutationWithClientMutationId({
   name: 'UpdateAllItemsOnTodoList',
@@ -36,6 +37,10 @@ const updateAllItemsOnTodoListMutation = mutationWithClientMutationId({
       type: new GraphQLNonNull(todoListType),
       resolve: payload => payload.todoList,
     },
+    updatedTodoItemIDs: {
+      type: new GraphQLNonNull(new GraphQLList(GraphQLID)),
+      resolve: payload => payload.updatedTodoItemIDs,
+    },
     updatedTodoItems: {
       type: new GraphQLNonNull(new GraphQLList(todoItemType)),
       resolve: payload => payload.updatedTodoItems,
@@ -44,17 +49,17 @@ const updateAllItemsOnTodoListMutation = mutationWithClientMutationId({
   mutateAndGetPayload: async ({ todoListID: todoListGlobalID, title, completed }) => {
     const { id: todoListID } = getTypeAndIDFromGlobalID(todoListGlobalID)
 
-    const {
-      todoList,
-      updatedTodoItems,
-    } = await updateAllTodoItemsOnTodoList(todoListID, {
+    const { todoList, updatedTodoItems, updatedTodoItemIDs } = await updateAllItemsOnTodoList(todoListID, {
       title,
       completed,
     })
 
+    const updatedTodoItemGlobalIDs = updatedTodoItemIDs.map(id => toGlobalId('TodoItem', id))
+
     pubsub.publish(ALL_ITEMS_UPDATED_ON_TODO_LIST, {
       todoListID: todoListGlobalID,
       todoList,
+      updatedTodoItemIDs: updatedTodoItemGlobalIDs,
       updatedTodoItems,
       changes: {
         title,
@@ -64,6 +69,7 @@ const updateAllItemsOnTodoListMutation = mutationWithClientMutationId({
 
     return {
       todoList,
+      updatedTodoItemIDs: updatedTodoItemGlobalIDs,
       updatedTodoItems,
     }
   },

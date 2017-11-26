@@ -1,11 +1,26 @@
 {
+  "env": {
+    "webpack": {
+      "presets": [
+        ["env", {
+          "targets": {
+            "browsers": ["> 10%"]
+          }
+        }]
+      ]
+    }
+  },
   "presets": [
     ["env", {
       "targets": {
-        "node": "8.0.0"
+        "node": "9.0.0"
       }
     }],
     "stage-1",
+    "react",
     "flow"
+  ],
+  "plugins": [
+    "relay"
   ]
 }

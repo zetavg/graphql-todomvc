@@ -6,7 +6,7 @@ import itemOnTodoListCreatedSubscription from './itemOnTodoListCreatedSubscripti
 import itemOnTodoListUpdatedSubscription from './itemOnTodoListUpdatedSubscription'
 import itemOnTodoListDeletedSubscription from './itemOnTodoListDeletedSubscription'
 import allItemsUpdatedOnTodoListSubscription from './allItemsUpdatedOnTodoListSubscription'
-import completedItemsClearedFromTodoListSubscription from './completedItemsClearedFromTodoListSubscription'
+import completedItemsDeletedOnTodoListSubscription from './completedItemsDeletedOnTodoListSubscription'
 
 // $FlowFixMe
 const subscriptionType = new GraphQLObjectType({
@@ -16,7 +16,7 @@ const subscriptionType = new GraphQLObjectType({
     itemOnTodoListUpdated: itemOnTodoListUpdatedSubscription,
     itemOnTodoListDeleted: itemOnTodoListDeletedSubscription,
     allItemsUpdatedOnTodoList: allItemsUpdatedOnTodoListSubscription,
-    completedItemsClearedFromTodoList: completedItemsClearedFromTodoListSubscription,
+    completedItemsDeletedOnTodoList: completedItemsDeletedOnTodoListSubscription,
   },
 })
 

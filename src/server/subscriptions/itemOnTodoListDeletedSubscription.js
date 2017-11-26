@@ -5,35 +5,25 @@ import {
   GraphQLObjectType,
   GraphQLID,
 } from 'graphql'
+
 import { withFilter } from 'graphql-subscriptions'
 
+import getSubscriptionFieldsFromMutation from './_getSubscriptionFieldsFromMutation'
+import deleteTodoItemMutation from '../mutations/deleteTodoItemMutation'
+
 import pubsub from './pubsub'
-import { TODO_ITEM_DELETED } from './consts'
-
-import todoItemType from '../types/todoItemType'
-import todoListType from '../types/todoListType'
-
-import { getTodoListFromTodoItem } from '../data'
+import { TODO_ITEM_DELETED } from './pubsub/event-types'
 
 const itemOnTodoListDeletedSubscription = {
-  type: new GraphQLObjectType({
-    name: 'ItemOnTodoListDeleted',
-    fields: {
-      todoItem: {
-        type: new GraphQLNonNull(todoItemType),
-        resolve: payload => payload.todoItem,
-      },
-      todoList: {
-        type: new GraphQLNonNull(todoListType),
-        resolve: async payload => await getTodoListFromTodoItem(payload.todoItem),
-      },
-    },
-  }),
   args: {
     todoListID: {
       type: new GraphQLNonNull(GraphQLID),
     },
   },
+  type: new GraphQLObjectType({
+    name: 'ItemOnTodoListDeleted',
+    fields: getSubscriptionFieldsFromMutation(deleteTodoItemMutation),
+  }),
   subscribe: withFilter(
     () => pubsub.asyncIterator(TODO_ITEM_DELETED),
     (payload, args) => payload.todoListID === args.todoListID,
