@@ -1,8 +1,7 @@
 {
   "name": "graphql-todomvc",
   "version": "1.0.0",
-  "description": "TodoMVC demonstration with GraphQL",
-  "main": "index.js",
+  "description": "TodoMVC demonstration of GraphQL",
   "scripts": {
     "start": "node dist/server/index.js",
     "build": "npm run update-schema && npm run relay-compile && npm run babel-compile && npm run webpack-pack && npm run copy-static-to-dist",
