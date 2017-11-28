@@ -1,6 +1,7 @@
 // @flow
 
 import express from 'express'
+import morgan from 'morgan'
 import { createServer } from 'http'
 import path from 'path'
 import { SubscriptionServer } from 'subscriptions-transport-ws'
@@ -14,6 +15,7 @@ const env = process.env.ENV || 'production'
 const port = process.env.PORT || 1337
 
 const app = express()
+app.use(morgan(env === 'production' ? 'combined' : 'dev'))
 
 app.use((req, res, next) => {
   req.viewer = getAuthenticatedUser()
