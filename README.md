@@ -31,6 +31,8 @@ npm start
 npm run dev
 ```
 
+Then open `http://localhost:1337` or `http://localhost:1337/graphql`.
+
 
 ## Deploy
 

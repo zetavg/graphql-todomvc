@@ -1,7 +1,7 @@
 module.exports = {
   entry: [
     'babel-polyfill',
-    './src/client/webpack-entry.js',
+    './lib/js/src/client-re/WebpackEntry.js',
   ],
   output: {
     filename: './dist/client/bundle.js',

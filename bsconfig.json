@@ -1,0 +1,14 @@
+{
+  "name": "graphql-todomvc",
+  "reason": {
+    "react-jsx": 2
+  },
+  "bs-dependencies": ["bs-webapi", "reason-react"],
+  "sources": [
+    {
+      "dir": "src/client-re",
+      "subdirs": true
+    }
+  ],
+  "refmt": 3
+}

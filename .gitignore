@@ -57,5 +57,10 @@ typings/
 # Yarn Integrity file
 .yarn-integrity
 
+# BuckleScript
+.merlin
+.bsb.lock
+/lib
+
 # dotenv environment variables file
 .env
