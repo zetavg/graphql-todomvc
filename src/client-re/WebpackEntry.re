@@ -20,5 +20,5 @@ document
       | None => raise(CannotGetBody)
     };
 
-    ReactDOMRe.renderToElementWithId(<Page message="Hello!" />, "main");
+    ReactDOMRe.renderToElementWithId(<TodoApp />, "main");
   });
